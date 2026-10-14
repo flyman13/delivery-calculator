@@ -5,81 +5,344 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Калькулятор Доставок</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
-        .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
-        h1 { text-align: center; color: #333; }
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-        .input-group input { width: calc(100% - 22px); padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; }
-        .results { margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; }
-        .results p { font-size: 18px; margin-bottom: 10px; }
-        .results span { font-weight: bold; color: #007bff; }
-        .reset-button { display: block; width: 100%; padding: 10px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 20px; }
-        .reset-button:hover { background-color: #c82333; }
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            background: #fff;
+            max-width: 500px;
+            width: 100%;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        h1 {
+            text-align: center;
+            margin-top: 0;
+            color: #222;
+            font-size: 24px;
+        }
+        .dashboard {
+            background: #eef2ff;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            border: 1px solid #c7d2fe;
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 18px;
+            margin: 8px 0;
+            font-weight: 600;
+        }
+        .stat-row.sub {
+            font-size: 14px;
+            color: #555;
+            font-weight: 500;
+        }
+        .val-kasa { color: #d97706; font-weight: 700; }
+        .val-earned { color: #16a34a; font-weight: 700; }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            background: #e5e7eb;
+            color: #374151;
+            transition: 0.2s;
+        }
+        .tab-btn.active.bolt { background: #34d399; color: #064e3b; }
+        .tab-btn.active.glovo { background: #fbbf24; color: #78350f; }
+        .tab-btn.active.shabashka { background: #60a5fa; color: #1e3a8a; }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #333;
+            font-size: 14px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        .btn-add {
+            width: 100%;
+            padding: 14px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+        .btn-add:hover { background: #1d4ed8; }
+
+        .history {
+            margin-top: 24px;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 16px;
+        }
+        .history h3 {
+            margin: 0 0 12px 0;
+            font-size: 16px;
+            color: #374151;
+        }
+        .history-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+        .history-item {
+            background: #f9fafb;
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #9ca3af;
+        }
+        .history-item.bolt { border-left-color: #10b981; }
+        .history-item.glovo { border-left-color: #f59e0b; }
+        .history-item.shabashka { border-left-color: #3b82f6; }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .btn-undo {
+            flex: 1;
+            padding: 12px;
+            background: #6b7280;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-reset {
+            flex: 1;
+            padding: 12px;
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Калькулятор Доставок</h1>
 
-        <div class="input-group">
-            <label for="clientPaymentCash">Скільки дав клієнт (готівкою за замовлення):</label>
-            <input type="number" id="clientPaymentCash" value="0" min="0" step="0.01">
+        <div class="dashboard">
+            <div class="stat-row">
+                <span>Загальна Каса:</span>
+                <span class="val-kasa"><span id="totalKasa">0</span> грн</span>
+            </div>
+            <div class="stat-row sub">
+                <span>— Каса Bolt: <b id="boltKasa">0</b> грн</span>
+                <span>— Каса Glovo: <b id="glovoKasa">0</b> грн</span>
+            </div>
+            <hr style="border:0; border-top:1px solid #c7d2fe; margin: 10px 0;">
+            <div class="stat-row">
+                <span>Загально зароблені:</span>
+                <span class="val-earned"><span id="totalEarned">0</span> грн</span>
+            </div>
+            <div class="stat-row sub">
+                <span>Bolt: <b id="boltEarned">0</b></span>
+                <span>Glovo: <b id="glovoEarned">0</b></span>
+                <span>Шабашки: <b id="shabashkaEarned">0</b></span>
+            </div>
         </div>
 
-        <div class="input-group">
-            <label for="deliveryEarnings">Скільки зароблено за доставку (від платформи):</label>
-            <input type="number" id="deliveryEarnings" value="0" min="0" step="0.01">
+        <div class="tabs">
+            <button class="tab-btn active bolt" onclick="selectTab('bolt')">Bolt</button>
+            <button class="tab-btn glovo" onclick="selectTab('glovo')">Glovo</button>
+            <button class="tab-btn shabashka" onclick="selectTab('shabashka')">Шабашка</button>
         </div>
 
-        <div class="input-group">
-            <label for="tipsCash">Чаєві (готівкою):</label>
-            <input type="number" id="tipsCash" value="0" min="0" step="0.01">
+        <div id="clientFieldGroup" class="form-group">
+            <label for="clientPaid">Скільки дав клієнт (0 якщо карткою):</label>
+            <input type="number" id="clientPaid" placeholder="Наприклад: 950" value="">
         </div>
 
-        <div class="input-group">
-            <label for="tipsCard">Чаєві (безготівкові/з додатку):</label>
-            <input type="number" id="tipsCard" value="0" min="0" step="0.01">
+        <div class="form-group">
+            <label for="deliveryPay">Скільки заробив за доставку:</label>
+            <input type="number" id="deliveryPay" placeholder="Наприклад: 100" value="">
         </div>
 
-        <div class="results">
-            <p>Загально зароблені: <span id="totalEarned">0.00</span> грн</p>
-            <p>Каса (готівка на руках): <span id="cashInHand">0.00</span> грн</p>
+        <div class="form-group">
+            <label for="tipsPay">Чаєві:</label>
+            <input type="number" id="tipsPay" placeholder="Наприклад: 50" value="">
         </div>
 
-        <button class="reset-button" onclick="resetCalculator()">Скинути</button>
+        <button class="btn-add" onclick="addDelivery()">+ Додати доставку</button>
+
+        <div class="history">
+            <h3>Історія доставок:</h3>
+            <ul id="historyList" class="history-list"></ul>
+        </div>
+
+        <div class="actions">
+            <button class="btn-undo" onclick="undoLast()">↩ Відмінити останню</button>
+            <button class="btn-reset" onclick="resetAll()">Скинути все</button>
+        </div>
     </div>
 
     <script>
-        function calculate() {
-            const clientPaymentCash = parseFloat(document.getElementById('clientPaymentCash').value) || 0;
-            const deliveryEarnings = parseFloat(document.getElementById('deliveryEarnings').value) || 0;
-            const tipsCash = parseFloat(document.getElementById('tipsCash').value) || 0;
-            const tipsCard = parseFloat(document.getElementById('tipsCard').value) || 0;
+        let currentSource = 'bolt';
+        let history = JSON.parse(localStorage.getItem('delivery_history_v2')) || [];
 
-            const totalEarned = deliveryEarnings + tipsCash + tipsCard;
-            const cashInHand = clientPaymentCash + tipsCash;
+        function selectTab(source) {
+            currentSource = source;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.tab-btn.${source}`).classList.add('active');
 
-            document.getElementById('totalEarned').textContent = totalEarned.toFixed(2);
-            document.getElementById('cashInHand').textContent = cashInHand.toFixed(2);
+            const clientGroup = document.getElementById('clientFieldGroup');
+            if (source === 'shabashka') {
+                clientGroup.style.display = 'none';
+                document.getElementById('clientPaid').value = '';
+            } else {
+                clientGroup.style.display = 'block';
+            }
         }
 
-        function resetCalculator() {
-            document.getElementById('clientPaymentCash').value = 0;
-            document.getElementById('deliveryEarnings').value = 0;
-            document.getElementById('tipsCash').value = 0;
-            document.getElementById('tipsCard').value = 0;
-            calculate(); // Recalculate to show 0.00
+        function addDelivery() {
+            const client = currentSource === 'shabashka' ? 0 : (parseFloat(document.getElementById('clientPaid').value) || 0);
+            const delivery = parseFloat(document.getElementById('deliveryPay').value) || 0;
+            const tips = parseFloat(document.getElementById('tipsPay').value) || 0;
+
+            if (client === 0 && delivery === 0 && tips === 0) {
+                alert('Введи хоча б одне значення!');
+                return;
+            }
+
+            const earnedDelta = delivery + tips;
+            const kasaDelta = currentSource === 'shabashka' ? 0 : (client - (delivery + tips));
+
+            const entry = {
+                id: Date.now(),
+                source: currentSource,
+                client,
+                delivery,
+                tips,
+                earnedDelta,
+                kasaDelta,
+                time: new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })
+            };
+
+            history.unshift(entry);
+            saveAndRender();
+
+            document.getElementById('clientPaid').value = '';
+            document.getElementById('deliveryPay').value = '';
+            document.getElementById('tipsPay').value = '';
         }
 
-        // Add event listeners to recalculate on input change
-        document.getElementById('clientPaymentCash').addEventListener('input', calculate);
-        document.getElementById('deliveryEarnings').addEventListener('input', calculate);
-        document.getElementById('tipsCash').addEventListener('input', calculate);
-        document.getElementById('tipsCard').addEventListener('input', calculate);
+        function undoLast() {
+            if (history.length === 0) return;
+            history.shift();
+            saveAndRender();
+        }
 
-        // Initial calculation on page load
-        document.addEventListener('DOMContentLoaded', calculate);
+        function resetAll() {
+            if (confirm('Точно скинути всю касу та історію?')) {
+                history = [];
+                saveAndRender();
+            }
+        }
+
+        function saveAndRender() {
+            localStorage.setItem('delivery_history_v2', JSON.stringify(history));
+
+            let boltKasa = 0, glovoKasa = 0;
+            let boltEarned = 0, glovoEarned = 0, shabashkaEarned = 0;
+
+            history.forEach(item => {
+                if (item.source === 'bolt') {
+                    boltKasa += item.kasaDelta;
+                    boltEarned += item.earnedDelta;
+                } else if (item.source === 'glovo') {
+                    glovoKasa += item.kasaDelta;
+                    glovoEarned += item.earnedDelta;
+                } else if (item.source === 'shabashka') {
+                    shabashkaEarned += item.earnedDelta;
+                }
+            });
+
+            const totalKasa = boltKasa + glovoKasa;
+            const totalEarned = boltEarned + glovoEarned + shabashkaEarned;
+
+            document.getElementById('totalKasa').textContent = totalKasa.toFixed(0);
+            document.getElementById('boltKasa').textContent = boltKasa.toFixed(0);
+            document.getElementById('glovoKasa').textContent = glovoKasa.toFixed(0);
+
+            document.getElementById('totalEarned').textContent = totalEarned.toFixed(0);
+            document.getElementById('boltEarned').textContent = boltEarned.toFixed(0);
+            document.getElementById('glovoEarned').textContent = glovoEarned.toFixed(0);
+            document.getElementById('shabashkaEarned').textContent = shabashkaEarned.toFixed(0);
+
+            const listEl = document.getElementById('historyList');
+            listEl.innerHTML = '';
+
+            if (history.length === 0) {
+                listEl.innerHTML = '<li style="color:#888; font-size:13px; text-align:center;">Історія порожня</li>';
+                return;
+            }
+
+            history.forEach(item => {
+                const li = document.createElement('li');
+                li.className = `history-item ${item.source}`;
+                const titleMap = { bolt: 'Bolt', glovo: 'Glovo', shabashka: 'Шабашка' };
+                const kasaText = item.source === 'shabashka' ? 'без каси' : `Каса: ${item.kasaDelta >= 0 ? '+' : ''}${item.kasaDelta}`;
+
+                li.innerHTML = `
+                    <div>
+                        <strong>${titleMap[item.source]}</strong> <span style="color:#888">(${item.time})</span><br>
+                        <span style="color:#555">Клієнт: ${item.client} | Дост: ${item.delivery} | Чай: ${item.tips}</span>
+                    </div>
+                    <div style="text-align:right; font-weight:600;">
+                        <span style="color:#16a34a">+${item.earnedDelta} грн</span><br>
+                        <span style="color:#d97706; font-size:12px;">${kasaText}</span>
+                    </div>
+                `;
+                listEl.appendChild(li);
+            });
+        }
+
+        saveAndRender();
     </script>
 </body>
 </html>
